@@ -147,6 +147,7 @@ public class NewThreadWorker extends Scheduler.Worker implements Disposable {
             } else {
                 f = executor.schedule((Callable<Object>)sr, delayTime, unit);
             }
+            // 处理返回值？
             sr.setFuture(f);
         } catch (RejectedExecutionException ex) {
             if (parent != null) {

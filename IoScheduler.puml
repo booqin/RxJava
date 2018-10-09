@@ -1,0 +1,39 @@
+@startuml
+
+'abstract class AbstractList
+'abstract AbstractCollection
+'interface List
+'interface Collection
+'
+'List <|-- AbstractList
+'Collection <|-- AbstractCollection
+'
+'Collection <|- List
+'AbstractCollection <|- AbstractList
+'AbstractList <|-- ArrayList
+'
+'class ArrayList {
+'Object[] elementData
+'size()
+'}
+'
+'enum TimeUnit {
+'DAYS
+'HOURS
+'MINUTES
+'}
+
+abstract class Scheduler{
+abstract Worker createWorker()
+void start()
+void shutdown()
+}
+
+abstract class Worker{
+Disposable schedule(@NonNull Runnable run)
+abstract Disposable schedule(@NonNull Runnable run, long delay, @NonNull TimeUnit unit);
+Disposable schedulePeriodically(@NonNull Runnable run, final long initialDelay, final long period, @NonNull final TimeUnit unit)
+long now(@NonNull TimeUnit unit)
+}
+
+@enduml

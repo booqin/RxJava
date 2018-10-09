@@ -40,6 +40,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
         if (scheduler instanceof TrampolineScheduler) {
             source.subscribe(observer);
         } else {
+            //获取worker
             Scheduler.Worker w = scheduler.createWorker();
 
             source.subscribe(new ObserveOnObserver<T>(observer, w, delayError, bufferSize));
@@ -79,12 +80,13 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
         public void onSubscribe(Disposable d) {
             if (DisposableHelper.validate(this.upstream, d)) {
                 this.upstream = d;
+                // 如果上流是一个QueueDisposable
                 if (d instanceof QueueDisposable) {
                     @SuppressWarnings("unchecked")
                     QueueDisposable<T> qd = (QueueDisposable<T>) d;
-
+                    // 聚变，比如upstream是一个Scheduler的情况 m 会被设置为ASYNC
                     int m = qd.requestFusion(QueueDisposable.ANY | QueueDisposable.BOUNDARY);
-
+                    // 同步的情况下开启Work
                     if (m == QueueDisposable.SYNC) {
                         sourceMode = m;
                         queue = qd;
@@ -112,8 +114,8 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             if (done) {
                 return;
             }
-
             if (sourceMode != QueueDisposable.ASYNC) {
+                //非异步，将商品保存到队列中
                 queue.offer(t);
             }
             schedule();
@@ -158,10 +160,11 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
 
         void schedule() {
             if (getAndIncrement() == 0) {
+                //指定线程中处理
                 worker.schedule(this);
             }
         }
-
+        //普通排出
         void drainNormal() {
             int missed = 1;
 
@@ -206,7 +209,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
                 }
             }
         }
-
+        //排出 融合后
         void drainFused() {
             int missed = 1;
 

@@ -1,0 +1,8 @@
+@startuml
+Observable -> Observable: observeOn
+Observable -> ObservableObserveOn:subscribeActual()
+ObservableObserveOn -> ObservableSource
+ObservableObserveOn -> ObserveOnObserver
+ObservableSource -> ObserveOnObserver:onNext
+
+@enduml

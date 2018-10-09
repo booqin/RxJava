@@ -93,6 +93,7 @@ public final class IoScheduler extends Scheduler {
             if (allWorkers.isDisposed()) {
                 return SHUTDOWN_THREAD_WORKER;
             }
+            // 到期工作队列
             while (!expiringWorkerQueue.isEmpty()) {
                 ThreadWorker threadWorker = expiringWorkerQueue.poll();
                 if (threadWorker != null) {
@@ -156,12 +157,14 @@ public final class IoScheduler extends Scheduler {
      */
     public IoScheduler(ThreadFactory threadFactory) {
         this.threadFactory = threadFactory;
+        // 原子引用
         this.pool = new AtomicReference<CachedWorkerPool>(NONE);
         start();
     }
 
     @Override
     public void start() {
+        // 单例 WorkerPool
         CachedWorkerPool update = new CachedWorkerPool(KEEP_ALIVE_TIME, KEEP_ALIVE_UNIT, threadFactory);
         if (!pool.compareAndSet(NONE, update)) {
             update.shutdown();
@@ -185,6 +188,7 @@ public final class IoScheduler extends Scheduler {
     @NonNull
     @Override
     public Worker createWorker() {
+        // 虽然重新创建了实例，但属于同一个CachedWorkerPool
         return new EventLoopWorker(pool.get());
     }
 
